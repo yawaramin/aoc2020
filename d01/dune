@@ -1,0 +1,7 @@
+(executable
+  (name d01p1)
+  (modules D01p1))
+
+(executable
+  (name d01p2)
+  (modules D01p2))
