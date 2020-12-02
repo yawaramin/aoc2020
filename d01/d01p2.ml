@@ -8,7 +8,7 @@ let update int2 int1 tbl2 action =
   else if Hashtbl.mem tbl2 int2 then
     action
   else begin
-    Hashtbl.add tbl2 int2 true;
+    Hashtbl.add tbl2 int2 ();
     Hashtbl.fold (check int2 int1) tbl2 action
   end
 
@@ -20,6 +20,7 @@ let add tbl int =
     Hashtbl.fold (update int) tbl `Continue
   end
 
+(* 253928438 *)
 let () =
   let tbl = Hashtbl.create 200 in
   let ch = open_in "input" in

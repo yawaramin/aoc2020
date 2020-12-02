@@ -1,3 +1,4 @@
+(* 1010884 *)
 let () =
   let tbl = Hashtbl.create 200 in
   let ch = open_in "input" in
@@ -7,12 +8,11 @@ let () =
     | int ->
       let other_int = 2020 - int in
       begin match Hashtbl.find tbl other_int with
-      | true ->
+      | () ->
         continue := false;
         Printf.printf "%d\n" (int * other_int)
-      | false
       | exception Not_found ->
-        Hashtbl.add tbl int true
+        Hashtbl.add tbl int ()
       end
     | exception End_of_file ->
       continue := false
