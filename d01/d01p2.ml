@@ -1,4 +1,4 @@
-let check int2 int1 int3 _ action =
+let check int2 int1 int3 () action =
   if int1 + int2 + int3 = 2020 then `Stop (int1, int2, int3)
   else action
 
