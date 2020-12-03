@@ -1,3 +1,9 @@
 (executable
   (name d02p1)
+  (libraries lib)
   (modules D02p1))
+
+(executable
+  (name d02p2)
+  (libraries lib)
+  (modules D02p2))
