@@ -6,7 +6,6 @@ let mapy = 323
 let map = Array.make_matrix mapx mapy 0
 
 let fill_line y (x, char) = match char with
-  | '.' -> map.(x).(y) <- 0
   | '#' -> map.(x).(y) <- 1
   | _ -> ()
 
@@ -28,12 +27,13 @@ let num_trees_for_slope right down =
    Part 2: 2138320800 *)
 let () =
   0 |> fold_file_lines "input" fill_row |> ignore;
+  let num_for_3_1 = num_trees_for_slope 3 1 in
   Printf.printf
     "Part 1: %d
 Part 2: %d\n"
-    (num_trees_for_slope 3 1)
+    num_for_3_1
     (num_trees_for_slope 1 1 *
-     num_trees_for_slope 3 1 *
+     num_for_3_1 *
      num_trees_for_slope 5 1 *
      num_trees_for_slope 7 1 *
      num_trees_for_slope 1 2)
