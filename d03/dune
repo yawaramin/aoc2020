@@ -1,0 +1,4 @@
+(executable
+  (name d03p1)
+  (libraries lib)
+  (modules D03p1))
