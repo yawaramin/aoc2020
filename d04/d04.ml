@@ -47,8 +47,11 @@ let count_valid (count, partial) = function
     count, List.fold_left fill_partial partial fields
 
 let () =
-  let num_valid, _ =
+  let num_valid, last_passport =
     Lib.fold_file_lines "input" count_valid (0, empty_passport)
+  in
+  let num_valid =
+    if valid_passport last_passport then succ num_valid else num_valid
   in
   Printf.printf "Part 1: %d\n" num_valid
 
