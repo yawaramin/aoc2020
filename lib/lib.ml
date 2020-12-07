@@ -4,8 +4,11 @@ let fold_file_lines name f init =
   let result = ref init in
   while !continue do
     match input_line ch with
-    | line -> result := f !result line
-    | exception End_of_file -> continue := false
+    | line ->
+      result := f !result line
+    | exception End_of_file ->
+      result := f !result "";
+      continue := false
   done;
   close_in ch;
   !result
