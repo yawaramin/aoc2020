@@ -70,21 +70,31 @@ let add_bags () = function
     | Ok { colour; contains } -> List.iter (add_bag colour) contains
     | Error msg -> failwith ("add_bags" ^ msg ^ ": '" ^ line ^ "'")
 
+let shiny_gold = "shiny gold"
+
 let check_bag container count = match container with
   | "shiny gold" ->
     count
   | _ ->
-    match BagSearch.shortest_path bags container "shiny gold" with
+    match BagSearch.shortest_path bags container shiny_gold with
     | _path -> succ count
     | exception Not_found -> count
+
+let rec count_bags edge count =
+  let num = Bags.E.label edge in
+  count + num * (1 + count_contents (Bags.E.dst edge) 0)
+
+and count_contents bag = Bags.fold_succ_e count_bags bags bag
 
 let () =
   Lib.fold_file_lines "input" add_bags ();
   let num_shiny_gold_paths = Bags.fold_vertex check_bag bags 0 in
+  let num_bags_in_shiny_gold = count_contents shiny_gold 0 in
   Printf.printf
     "Part 1: %d
-Part 2:\n"
+Part 2: %d\n"
     num_shiny_gold_paths
+    num_bags_in_shiny_gold
 
 (* Part 1: 155
-   Part 2: *)
+   Part 2: 54803 *)
