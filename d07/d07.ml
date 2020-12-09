@@ -32,11 +32,19 @@ module Parser = struct
     { colour; contains }
 end
 
-module Bags = Graph.Imperative.Digraph.Concrete(struct
+module Bag = struct
   type t = string
+
   let compare = String.compare
   let equal = String.equal
   let hash = Hashtbl.hash
+end
+
+module Bags = Graph.Imperative.Digraph.ConcreteLabeled(Bag)(struct
+  type t = int
+
+  let compare = Int.compare
+  let default = 0
 end)
 
 module BagSearch = Graph.Path.Dijkstra(Bags)(struct
@@ -51,10 +59,8 @@ end)
 
 let bags = Bags.create ~size:594 ()
 
-let add_bag colour ({ colour = content_colour; _ }, _) =
-  Bags.add_vertex bags colour;
-  Bags.add_vertex bags content_colour;
-  Bags.add_edge bags colour content_colour
+let add_bag colour ({ colour = content_colour; _ }, count) =
+  Bags.add_edge_e bags (Bags.E.create colour count content_colour)
 
 let add_bags () = function
   | "" ->
@@ -73,7 +79,7 @@ let check_bag container count = match container with
     | exception Not_found -> count
 
 let () =
-  let () = Lib.fold_file_lines "input" add_bags () in
+  Lib.fold_file_lines "input" add_bags ();
   let num_shiny_gold_paths = Bags.fold_vertex check_bag bags 0 in
   Printf.printf
     "Part 1: %d
