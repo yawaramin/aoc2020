@@ -1,8 +1,9 @@
-type instruction = Nop | Acc of int | Jmp of int
+type op = Nop | Acc | Jmp
+type instruction = op * int
 
 let size = 628
-let program = Array.make size Nop
-let history = Hashtbl.create size
+let program = Array.make size (Nop, 0)
+let history = Array.make size false
 
 let instruction_of_string line =
   let len = String.length line in
@@ -17,11 +18,13 @@ let instruction_of_string line =
     Bytes.set msg 37 ch;
     failwith (Bytes.to_string msg)
   in
-  match String.sub line 0 3 with
-  | "nop" -> Nop
-  | "acc" -> Acc num
-  | "jmp" -> Jmp num
-  | op -> failwith ("instruction_of_string: invalid op: " ^ op)
+  let op = match String.sub line 0 3 with
+    | "nop" -> Nop
+    | "acc" -> Acc
+    | "jmp" -> Jmp
+    | op -> failwith ("instruction_of_string: invalid op: " ^ op)
+  in
+  op, num
 
 let load_instruction ptr =
   let next_ptr = succ ptr in
@@ -32,22 +35,24 @@ let load_instruction ptr =
     program.(ptr) <- instruction_of_string line;
     next_ptr
 
+let rec run ptr acc =
+  if not (history.(ptr)) && ptr < size then begin
+    history.(ptr) <- true;
+    match program.(ptr) with
+    | Nop, _ -> run (succ ptr) acc
+    | Acc, amt -> run (succ ptr) (acc + amt)
+    | Jmp, amt -> run (ptr + amt) acc
+  end else
+    (* Tuple of: (accumulator, did the program terminate?) *)
+    acc, ptr = size
+
 let () =
   ignore (Lib.fold_file_lines "input" load_instruction 0);
-  let acc = ref 0 in
-  let ptr = ref 0 in
-  while not (Hashtbl.mem history !ptr) && !ptr < size do
-    let ptr_val = !ptr in
-    Hashtbl.add history ptr_val ();
-    match program.(ptr_val) with
-    | Nop ->
-      incr ptr
-    | Acc amt ->
-      incr ptr;
-      acc := !acc + amt
-    | Jmp amt -> ptr := ptr_val + amt
-  done;
+  let acc_p1, _ = run 0 0 in
   Printf.printf
     "Part 1: %d
 Part 2:\n"
-    !acc
+    acc_p1
+
+(* Part 1: 1766
+   Part 2: *)
