@@ -5,26 +5,20 @@ let size = 628
 let program = Array.make size (Nop, 0)
 let history = Array.make size false
 
-let instruction_of_string line =
-  let len = String.length line in
-  let num = int_of_string (String.sub line 5 (len - 5)) in
-  let num = match line.[4] with
-  | '+' ->
-    num
-  | '-' ->
-    -num
-  | ch ->
-    let msg = Bytes.of_string "instruction_of_string: invalid sign:  " in
-    Bytes.set msg 37 ch;
-    failwith (Bytes.to_string msg)
-  in
-  let op = match String.sub line 0 3 with
+let instruction_of_string line = match String.split_on_char ' ' line with
+  | [op; num] ->
+    let num = try int_of_string num with
+      | Failure _ -> failwith ("instruction_of_string: bad number: " ^ num)
+    in
+    let op = match op with
     | "nop" -> Nop
     | "acc" -> Acc
     | "jmp" -> Jmp
-    | op -> failwith ("instruction_of_string: invalid op: " ^ op)
-  in
-  op, num
+    | _ -> failwith ("instruction_of_string: bad op: " ^ op)
+    in
+    op, num
+  | _ ->
+    failwith ("instruction_of_string: bad input: " ^ line)
 
 let load_instruction ptr =
   let next_ptr = succ ptr in
@@ -35,23 +29,31 @@ let load_instruction ptr =
     program.(ptr) <- instruction_of_string line;
     next_ptr
 
-let rec run ptr acc =
+let eval ~ptr ~acc = function
+  | Nop, _ -> succ ptr, acc
+  | Acc, amt -> succ ptr, acc + amt
+  | Jmp, amt -> ptr + amt, acc
+
+let rec run ?flip (ptr, acc) =
   if not (history.(ptr)) && ptr < size then begin
     history.(ptr) <- true;
-    match program.(ptr) with
-    | Nop, _ -> run (succ ptr) acc
-    | Acc, amt -> run (succ ptr) (acc + amt)
-    | Jmp, amt -> run (ptr + amt) acc
+    match program.(ptr), flip with
+    | (Nop, amt), Some fliptr when ptr = fliptr ->
+      run (eval ~ptr ~acc (Jmp, amt))
+    | (Jmp, amt), Some fliptr when ptr = fliptr ->
+      run (eval ~ptr ~acc (Nop, amt))
+    | instruction, _ ->
+      run (eval ~ptr ~acc instruction)
   end else
     (* Tuple of: (accumulator, did the program terminate?) *)
     acc, ptr = size
 
 let () =
   ignore (Lib.fold_file_lines "input" load_instruction 0);
-  let acc_p1, _ = run 0 0 in
+  let acc_p1, _ = run (0, 0) in
   Printf.printf
     "Part 1: %d
-Part 2:\n"
+Part 2: TODO\n"
     acc_p1
 
 (* Part 1: 1766
