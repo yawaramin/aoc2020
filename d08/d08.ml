@@ -1,5 +1,4 @@
 type op = Nop | Acc | Jmp
-type instruction = op * int
 
 let size = 628
 let program = Array.make size (Nop, 0)
